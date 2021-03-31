@@ -1,6 +1,8 @@
+require("dotenv").config();
 const { program } = require("commander");
 const inquirer = require("inquirer");
 const preguntas = require("./preguntas");
+const chalk = require("chalk");
 
 
 program
@@ -9,10 +11,16 @@ program
 
 program.parse(process.argv);
 
-const options = program.opts();
-console.log(options);
+const opciones = program.opts();
+console.log(opciones);
 
-inquirer.prompt(preguntas)
+inquirer.prompt(preguntas(opciones))
   .then(resp => {
     // resp es un array con las respuestas
+    console.log(resp);
+    if (resp.transporte === "bus") {
+      console.log(chalk.yellow("no tenemos información disponible sobre los buses. Para más info ves a:"));
+      console.log(chalk.yellow(process.env.url_tmb));
+      process.exit(0);
+    }
   });
