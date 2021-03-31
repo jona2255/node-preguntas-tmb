@@ -16,11 +16,17 @@ console.log(opciones);
 
 inquirer.prompt(preguntas(opciones))
   .then(resp => {
-    // resp es un array con las respuestas
     console.log(resp);
     if (resp.transporte === "bus") {
       console.log(chalk.yellow("no tenemos información disponible sobre los buses. Para más info ves a:"));
       console.log(chalk.yellow(process.env.url_tmb));
       process.exit(0);
+    }
+    if (resp.linea === "") {
+      if (resp.error) {
+        console.log(chalk.red.bold("No existe la línea seleccionada"));
+        process.exit(1);
+      }
+      process.exit(1);
     }
   });
