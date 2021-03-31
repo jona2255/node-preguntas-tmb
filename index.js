@@ -20,10 +20,8 @@ const error = () => {
 };
 
 const mostrarDatos = (color, datos, respuesta) => {
-  const paradaMensaje = datos.features[0].properties.NOM_LINIA +
-    "\n" + datos.features[0].properties.DESC_SERVEI;
-  const lineasMensaje = datos.features.filter(linea => linea.properties.NOM_ESTACIO_INI !== "Inici");
-  console.log(respuesta.informacion);
+  const paradaMensaje = respuesta.linea + "\n" + datos[0].properties.DESC_SERVEI;
+  const lineasMensaje = datos.filter(linea => linea.properties.NOM_ESTACIO_INI !== "Inici");
   if (respuesta.informacion[0] === "coordenadas" && respuesta.informacion[1] === "fecha-inauguración") {
     if (opciones.abrev) {
       console.log(chalk.hex(color)(paradaMensaje + "\n" + lineasMensaje.map(linea => "\n" + linea.properties.NOM_ESTACIO_INI.substring(0, 3) + ". " + linea.properties.DATA + " " + linea.geometry.coordinates[0].map(coordenada => coordenada[0]))));
@@ -34,7 +32,6 @@ const mostrarDatos = (color, datos, respuesta) => {
     if (opciones.abrev) {
       console.log(chalk.hex(color)(paradaMensaje + "\n" + lineasMensaje.map(linea => "\n" + linea.properties.NOM_ESTACIO_INI.substring(0, 3) + ". " + " " + linea.properties.DATA)));
     } else {
-      console.log("fecha");
       console.log(chalk.hex(color)(paradaMensaje + "\n" + lineasMensaje.map(linea => "\n" + linea.properties.NOM_ESTACIO_INI + " " + linea.properties.DATA)));
     }
   } else if (respuesta.informacion.includes("coordenadas")) {
@@ -67,19 +64,22 @@ inquirer.prompt(preguntas)
       }
       process.exit(1);
     }
-    fetch(`${process.env.url_api_tmb + resp.linea}/trams/?app_id=${process.env.api_id}&app_key=${process.env.api_key}`)
+
+    fetch(`${process.env.url_api_tmb}/trams/?app_id=${process.env.api_id}&app_key=${process.env.api_key}`)
       .then(res => res.json())
       .then(json => {
-        if (json.numberReturned === 0) {
+        if (!json.features.find(parada => parada.properties.NOM_LINIA === resp.linea)) {
           if (resp.error) {
             error();
           }
           process.exit(1);
         }
+        const jsonModificado = json.features.filter(parada => parada.properties.NOM_LINIA === resp.linea);
+
         if (opciones.color) {
-          mostrarDatos(opciones.color, json, resp);
+          mostrarDatos(opciones.color, jsonModificado, resp);
         } else {
-          mostrarDatos(`#${json.features[0].properties.COLOR_LINIA}`, json, resp);
+          mostrarDatos(`#${jsonModificado[0].properties.COLOR_LINIA}`, jsonModificado, resp);
         }
 
       });
