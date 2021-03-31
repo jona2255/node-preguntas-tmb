@@ -1,4 +1,4 @@
-const preguntas = opciones => ([
+const preguntas = [
   {
     type: "list",
     name: "transporte",
@@ -42,6 +42,6 @@ const preguntas = opciones => ([
     message: "¿Qué línea quiere consultar?",
     when: respuestas => respuestas.transporte !== "bus"
   }
-]);
+];
 
 module.exports = preguntas;
